@@ -1,11 +1,9 @@
 /* Проверяем длину строки */
 
+// eslint-disable-next-line no-unused-vars
 function lineLenght(text, count) {
   return text.length <= count;
 }
-lineLenght('проверяемая строка', 20);
-lineLenght('проверяемая строка', 18);
-lineLenght('проверяемая строка', 10);
 
 /* Проверка, является ли строка палиндромом */
 
