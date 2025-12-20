@@ -1,6 +1,8 @@
 /* Модуль для работы с формой загрузки изображения */
 
 import { initImageEditor, resetImageEditor } from './image-editor.js';
+import { sendForm } from './api.js';
+import { showSuccessMessage, showErrorMessage } from './message.js';
 
 const HASHTAG_REGEX = /^#[a-zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAGS = 5;
@@ -12,6 +14,7 @@ const imgUploadOverlay = document.querySelector('.img-upload__overlay');
 const imgUploadCancel = document.querySelector('.img-upload__cancel');
 const hashtagsInput = document.querySelector('.text__hashtags');
 const commentInput = document.querySelector('.text__description');
+const submitButton = document.querySelector('.img-upload__submit');
 
 let pristine;
 
@@ -35,15 +38,26 @@ function initPristine() {
     if (!value.trim()) {
       return true;
     }
-
     const hashtags = value.trim().split(/\s+/);
+    return hashtags.length <= MAX_HASHTAGS;
+  }, `Максимум ${MAX_HASHTAGS} хеш-тегов`);
 
-    if (hashtags.length > MAX_HASHTAGS) {
-      return false;
+  pristine.addValidator(hashtagsInput, (value) => {
+    if (!value.trim()) {
+      return true;
     }
+    const hashtags = value.trim().split(/\s+/);
+    return hashtags.every((tag) => tag !== '#' && HASHTAG_REGEX.test(tag) && tag.length <= 20);
+  }, 'Неверный формат хеш-тега (начинается с #, только буквы и цифры, до 20 символов)');
 
-    return hashtags.every((tag) => HASHTAG_REGEX.test(tag) && tag.length <= 20);
-  }, 'Максимум 5 хеш-тегов. Каждый тег начинается с #, содержит буквы и цифры, макс 20 символов');
+  pristine.addValidator(hashtagsInput, (value) => {
+    if (!value.trim()) {
+      return true;
+    }
+    const hashtags = value.trim().split(/\s+/);
+    const lowerCaseTags = hashtags.map((tag) => tag.toLowerCase());
+    return new Set(lowerCaseTags).size === lowerCaseTags.length;
+  }, 'Обнаружены повторяющиеся хеш-теги');
 
   pristine.addValidator(commentInput, (value) => value.length <= MAX_COMMENT_LENGTH, `Комментарий не может быть длиннее ${MAX_COMMENT_LENGTH} символов`);
 }
@@ -54,6 +68,7 @@ function openImgUploadOverlay() {
   imgUploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
   document.addEventListener('keydown', onOverlayEscKeyDown);
+
   initImageEditor();
 }
 
@@ -65,6 +80,7 @@ function closeImgUploadOverlay() {
   imgUploadInput.value = '';
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onOverlayEscKeyDown);
+
   resetImageEditor();
 }
 
@@ -82,6 +98,20 @@ function onInputKeyDown(evt) {
   evt.stopPropagation();
 }
 
+/* Блокирует кнопку отправки */
+
+function disableSubmitButton() {
+  submitButton.disabled = true;
+  submitButton.textContent = 'Отправляется...';
+}
+
+/* Разблокирует кнопку отправки */
+
+function enableSubmitButton() {
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
+}
+
 /* Инициализирует модуль формы */
 
 export function initForm() {
@@ -96,11 +126,23 @@ export function initForm() {
   hashtagsInput.addEventListener('keydown', onInputKeyDown);
   commentInput.addEventListener('keydown', onInputKeyDown);
 
-  imgUploadForm.addEventListener('submit', (evt) => {
+  imgUploadForm.addEventListener('submit', async (evt) => {
     evt.preventDefault();
 
-    if (pristine && pristine.validate()) {
-      imgUploadForm.submit();
+    if (!pristine || !pristine.validate()) {
+      return;
+    }
+
+    disableSubmitButton();
+
+    try {
+      await sendForm(imgUploadForm);
+      showSuccessMessage();
+      closeImgUploadOverlay();
+    } catch (error) {
+      showErrorMessage();
+    } finally {
+      enableSubmitButton();
     }
   });
 }

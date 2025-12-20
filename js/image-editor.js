@@ -130,19 +130,11 @@ function onEffectChange(evt) {
 export function initImageEditor() {
   updateScale(100);
 
-  scaleMinus.addEventListener('click', () => {
-    const currentScale = parseInt(scaleValue.value, 10);
-    if (currentScale > SCALE_MIN) {
-      updateScale(currentScale - SCALE_STEP);
-    }
-  });
+  scaleMinus.removeEventListener('click', onScaleMinus);
+  scalePlus.removeEventListener('click', onScalePlus);
 
-  scalePlus.addEventListener('click', () => {
-    const currentScale = parseInt(scaleValue.value, 10);
-    if (currentScale < SCALE_MAX) {
-      updateScale(currentScale + SCALE_STEP);
-    }
-  });
+  scaleMinus.addEventListener('click', onScaleMinus);
+  scalePlus.addEventListener('click', onScalePlus);
 
   effectRadios.forEach((radio) => {
     radio.removeEventListener('change', onEffectChange);
@@ -151,6 +143,21 @@ export function initImageEditor() {
 
   initEffectSlider();
 }
+
+function onScaleMinus() {
+  const currentScale = parseInt(scaleValue.value, 10);
+  if (currentScale > SCALE_MIN) {
+    updateScale(currentScale - SCALE_STEP);
+  }
+}
+
+function onScalePlus() {
+  const currentScale = parseInt(scaleValue.value, 10);
+  if (currentScale < SCALE_MAX) {
+    updateScale(currentScale + SCALE_STEP);
+  }
+}
+
 
 /* Сбрасывает редактор при закрытии окна */
 

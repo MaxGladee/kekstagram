@@ -1,9 +1,5 @@
-import { photos } from './main.js';
+import { getPhotos } from './api.js';
 
-/** Создает DOM-элемент фотографии на основе шаблона
- * @param {Object} photo
- * @returns {HTMLElement}
- */
 function createPhotoElement(photo) {
   const template = document.querySelector('#picture');
   const pictureElement = template.cloneNode(true).content;
@@ -21,18 +17,23 @@ function createPhotoElement(photo) {
   return pictureElement;
 }
 
-/* Отрисовывает все фотографии в контейнер */
-
-export function renderPictures() {
+export async function renderPictures() {
   const picturesContainer = document.querySelector('.pictures');
 
-  const fragment = document.createDocumentFragment();
+  try {
+    const photos = await getPhotos();
 
-  /* Заполняет фрагмент элементами фотографий */
+    const fragment = document.createDocumentFragment();
 
-  photos.forEach((photo) => {
-    fragment.appendChild(createPhotoElement(photo));
-  });
+    photos.forEach((photo) => {
+      fragment.appendChild(createPhotoElement(photo));
+    });
 
-  picturesContainer.appendChild(fragment);
+    picturesContainer.appendChild(fragment);
+  } catch (error) {
+    const errorElement = document.createElement('div');
+    errorElement.style.cssText = 'padding: 20px; color: red; text-align: center;';
+    errorElement.textContent = 'Ошибка при загрузке фотографий. Попробуйте позже.';
+    picturesContainer.appendChild(errorElement);
+  }
 }
