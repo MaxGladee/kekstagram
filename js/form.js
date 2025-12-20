@@ -1,5 +1,7 @@
 /* Модуль для работы с формой загрузки изображения */
 
+import { initImageEditor, resetImageEditor } from './image-editor.js';
+
 const HASHTAG_REGEX = /^#[a-zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAGS = 5;
 const MAX_COMMENT_LENGTH = 140;
@@ -51,8 +53,8 @@ function initPristine() {
 function openImgUploadOverlay() {
   imgUploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
-
   document.addEventListener('keydown', onOverlayEscKeyDown);
+  initImageEditor();
 }
 
 /* Закрывает окно редактирования изображения */
@@ -62,8 +64,8 @@ function closeImgUploadOverlay() {
   imgUploadForm.reset();
   imgUploadInput.value = '';
   document.body.classList.remove('modal-open');
-
   document.removeEventListener('keydown', onOverlayEscKeyDown);
+  resetImageEditor();
 }
 
 /* Обработчик нажатия Esc при открытом окне */
