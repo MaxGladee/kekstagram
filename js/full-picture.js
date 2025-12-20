@@ -2,6 +2,10 @@ import { photos } from './main.js';
 
 /* Функция просмотра фотографий в полноразмерном режиме */
 
+const COMMENTS_PER_PAGE = 5;
+let currentPhotoIndex = null;
+let currentDisplayedComments = 0;
+
 function createCommentElement(comment) {
   const li = document.createElement('li');
   li.className = 'social__comment';
@@ -19,12 +23,49 @@ function createCommentElement(comment) {
   return li;
 }
 
+/* Обновляет счетчик комментариев и управляет видимостью кнопки загрузки */
+
+function updateCommentCount() {
+  const commentCount = document.querySelector('.social__comment-count');
+  const commentLoader = document.querySelector('.comments-loader');
+  const photo = photos[currentPhotoIndex];
+  const totalComments = photo.comments.length;
+
+  const displayedCount = Math.min(currentDisplayedComments, totalComments);
+  commentCount.textContent = `${displayedCount} из ${totalComments}`;
+
+  if (currentDisplayedComments >= totalComments) {
+    commentLoader.classList.add('hidden');
+  } else {
+    commentLoader.classList.remove('hidden');
+  }
+}
+
+
+/* Отрисовывает комментарии по 5 штук */
+
+function renderComments(photo, startIndex = 0) {
+  const socialComments = document.querySelector('.social__comments');
+
+  const endIndex = startIndex + COMMENTS_PER_PAGE;
+  const commentsToShow = photo.comments.slice(startIndex, endIndex);
+
+  const commentFragment = document.createDocumentFragment();
+  commentsToShow.forEach((comment) => {
+    commentFragment.appendChild(createCommentElement(comment));
+  });
+
+  socialComments.appendChild(commentFragment);
+
+  currentDisplayedComments = endIndex;
+  updateCommentCount();
+}
+
 /* Заполняет полноразмерное окно данными о фотографии */
 
 function fillBigPicture(photo) {
   const bigPictureImg = document.querySelector('.big-picture__img img');
   const likesCount = document.querySelector('.likes-count');
-  const commentsCount = document.querySelector('.comments-count');
   const socialCaption = document.querySelector('.social__caption');
   const socialComments = document.querySelector('.social__comments');
 
@@ -33,30 +74,24 @@ function fillBigPicture(photo) {
 
   likesCount.textContent = photo.likes;
 
-  commentsCount.textContent = photo.comments.length;
-
   socialCaption.textContent = photo.description;
 
   socialComments.innerHTML = '';
 
-  const commentFragment = document.createDocumentFragment();
-  photo.comments.forEach((comment) => {
-    commentFragment.appendChild(createCommentElement(comment));
-  });
-  socialComments.appendChild(commentFragment);
+  currentDisplayedComments = 0;
+  renderComments(photo, 0);
 }
 
 /* Открывает окно полноразмерного просмотра */
 
-function openBigPicture(photo) {
+function openBigPicture(photo, photoIndex) {
   const bigPicture = document.querySelector('.big-picture');
+
+  currentPhotoIndex = photoIndex;
 
   fillBigPicture(photo);
 
   bigPicture.classList.remove('hidden');
-
-  document.querySelector('.social__comment-count').classList.add('hidden');
-  document.querySelector('.comments-loader').classList.add('hidden');
 
   document.body.classList.add('modal-open');
 }
@@ -69,6 +104,9 @@ function closeBigPicture() {
   bigPicture.classList.add('hidden');
 
   document.body.classList.remove('modal-open');
+
+  currentPhotoIndex = null;
+  currentDisplayedComments = 0;
 }
 
 /* Инициализирует модуль полноразмерного просмотра */
@@ -76,12 +114,20 @@ function closeBigPicture() {
 export function initBigPicture() {
   const bigPicture = document.querySelector('.big-picture');
   const closeButton = bigPicture.querySelector('.big-picture__cancel');
+  const commentsLoader = document.querySelector('.comments-loader');
 
   closeButton.addEventListener('click', closeBigPicture);
 
   document.addEventListener('keydown', (evt) => {
     if (evt.key === 'Escape' && !bigPicture.classList.contains('hidden')) {
       closeBigPicture();
+    }
+  });
+
+  commentsLoader.addEventListener('click', () => {
+    if (currentPhotoIndex !== null) {
+      const photo = photos[currentPhotoIndex];
+      renderComments(photo, currentDisplayedComments);
     }
   });
 }
@@ -99,7 +145,7 @@ export function attachPhotoClickHandlers() {
       const index = Array.from(pictures).indexOf(picture);
 
       if (index !== -1) {
-        openBigPicture(photos[index]);
+        openBigPicture(photos[index], index);
       }
     }
   });
