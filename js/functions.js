@@ -9,6 +9,7 @@ lineLenght('проверяемая строка', 10);
 
 /* Проверка, является ли строка палиндромом */
 
+// eslint-disable-next-line no-unused-vars
 function isPalindrome(text) {
   const normalized = text.replaceAll(' ', '').toLowerCase();
   let reversed = '';
@@ -17,13 +18,10 @@ function isPalindrome(text) {
   }
   return normalized === reversed;
 }
-isPalindrome('топот');
-isPalindrome('ДовОд');
-isPalindrome('Кекс');
-isPalindrome('Лёша на полке клопа нашёл ');
 
 /* Функция принимает строку, извлекает содержащиеся в ней цифры от 0 до 9 и возвращает их в виде целого положительного числа */
 
+// eslint-disable-next-line no-unused-vars
 function extractNumbers(text) {
   const str = String(text);
 
@@ -42,12 +40,22 @@ function extractNumbers(text) {
   return parseInt(result, 10);
 }
 
-extractNumbers('2023 год');
-extractNumbers('ECMAScript 2022');
-extractNumbers('1 кефир, 0.5 батона');
-extractNumbers('агент 007');
-extractNumbers('a я томат');
+/* Функция, принимающая время начала и конца рабочего дня, продолжительности встречи в рамках рабочего дня */
 
-extractNumbers(2023);
-extractNumbers(-1);
-extractNumbers(1.5);
+// eslint-disable-next-line no-unused-vars
+function isMeetingWithinWorkday(workStart, workEnd, meetingStart, meetingDuration) {
+  const toMinutes = (time) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const workStartMinutes = toMinutes(workStart);
+  const workEndMinutes = toMinutes(workEnd);
+  const meetingStartMinutes = toMinutes(meetingStart);
+  const meetingEndMinutes = meetingStartMinutes + meetingDuration;
+
+  return (
+    meetingStartMinutes >= workStartMinutes &&
+    meetingEndMinutes <= workEndMinutes
+  );
+}
