@@ -48,4 +48,3 @@ export function makeComments() {
 
   return list;
 }
-

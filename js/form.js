@@ -15,11 +15,11 @@ const imgUploadCancel = document.querySelector('.img-upload__cancel');
 const hashtagsInput = document.querySelector('.text__hashtags');
 const commentInput = document.querySelector('.text__description');
 const submitButton = document.querySelector('.img-upload__submit');
+const imgPreview = document.querySelector('.img-upload__preview img');
 
 let pristine;
 
 /* Инициализирует Pristine для валидации формы */
-
 function initPristine() {
   if (typeof Pristine === 'undefined') {
     return;
@@ -38,6 +38,7 @@ function initPristine() {
     if (!value.trim()) {
       return true;
     }
+
     const hashtags = value.trim().split(/\s+/);
     return hashtags.length <= MAX_HASHTAGS;
   }, `Максимум ${MAX_HASHTAGS} хеш-тегов`);
@@ -46,6 +47,7 @@ function initPristine() {
     if (!value.trim()) {
       return true;
     }
+
     const hashtags = value.trim().split(/\s+/);
     return hashtags.every((tag) => tag !== '#' && HASHTAG_REGEX.test(tag) && tag.length <= 20);
   }, 'Неверный формат хеш-тега (начинается с #, только буквы и цифры, до 20 символов)');
@@ -54,6 +56,7 @@ function initPristine() {
     if (!value.trim()) {
       return true;
     }
+
     const hashtags = value.trim().split(/\s+/);
     const lowerCaseTags = hashtags.map((tag) => tag.toLowerCase());
     return new Set(lowerCaseTags).size === lowerCaseTags.length;
@@ -62,30 +65,66 @@ function initPristine() {
   pristine.addValidator(commentInput, (value) => value.length <= MAX_COMMENT_LENGTH, `Комментарий не может быть длиннее ${MAX_COMMENT_LENGTH} символов`);
 }
 
-/* Открывает окно редактирования изображения */
+/* Загружает выбранное пользователем изображение в предпросмотр */
+/* Загружает выбранное пользователем изображение в предпросмотр */
+function loadSelectedImage() {
+  const file = imgUploadInput.files[0];
 
+  if (file) {
+    // Очищаем старый blob если был
+    if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
+      URL.revokeObjectURL(imgPreview.src);
+    }
+
+    const blobUrl = URL.createObjectURL(file);
+    imgPreview.src = blobUrl;
+    // Устанавливаем background-image для всех превью эффектов
+    const effectsPreviews = document.querySelectorAll('.effects__preview');
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url("${blobUrl}")`;
+    });
+  }
+}
+
+/* Открывает окно редактирования изображения */
 function openImgUploadOverlay() {
+  loadSelectedImage();
   imgUploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
   document.addEventListener('keydown', onOverlayEscKeyDown);
-
   initImageEditor();
 }
 
 /* Закрывает окно редактирования изображения */
-
+/* Закрывает окно редактирования изображения */
 function closeImgUploadOverlay() {
+  // Очищаем blob URL перед закрытием
+  if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
+    URL.revokeObjectURL(imgPreview.src);
+  }
+
+  imgPreview.src = 'img/upload-default-image.jpg';
+
+  // Очищаем background-image у превью эффектов
+  const effectsPreviews = document.querySelectorAll('.effects__preview');
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
+
   imgUploadOverlay.classList.add('hidden');
   imgUploadForm.reset();
   imgUploadInput.value = '';
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onOverlayEscKeyDown);
-
   resetImageEditor();
+
+  if (pristine) {
+    pristine.reset();
+  }
 }
 
-/* Обработчик нажатия Esc при открытом окне */
 
+/* Обработчик нажатия Esc при открытом окне */
 function onOverlayEscKeyDown(evt) {
   if (evt.key === 'Escape') {
     closeImgUploadOverlay();
@@ -93,43 +132,37 @@ function onOverlayEscKeyDown(evt) {
 }
 
 /* Обработчик нажатия Esc в поле ввода - отменяет закрытие окна */
-
 function onInputKeyDown(evt) {
   evt.stopPropagation();
 }
 
 /* Блокирует кнопку отправки */
-
 function disableSubmitButton() {
   submitButton.disabled = true;
   submitButton.textContent = 'Отправляется...';
 }
 
 /* Разблокирует кнопку отправки */
-
 function enableSubmitButton() {
   submitButton.disabled = false;
   submitButton.textContent = 'Опубликовать';
 }
 
 /* Инициализирует модуль формы */
-
 export function initForm() {
   setTimeout(() => {
     initPristine();
   }, 100);
 
   imgUploadInput.addEventListener('change', openImgUploadOverlay);
-
   imgUploadCancel.addEventListener('click', closeImgUploadOverlay);
-
   hashtagsInput.addEventListener('keydown', onInputKeyDown);
   commentInput.addEventListener('keydown', onInputKeyDown);
 
   imgUploadForm.addEventListener('submit', async (evt) => {
     evt.preventDefault();
 
-    if (!pristine || !pristine.validate()) {
+    if (pristine && !pristine.validate()) {
       return;
     }
 
@@ -140,9 +173,11 @@ export function initForm() {
       showSuccessMessage();
       closeImgUploadOverlay();
     } catch (error) {
+      closeImgUploadOverlay();
       showErrorMessage();
     } finally {
       enableSubmitButton();
     }
   });
+
 }

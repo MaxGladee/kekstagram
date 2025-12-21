@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* Модуль для работы с сервером */
 
-const BASE_URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
+const BASE_URL = 'https://32.javascript.htmlacademy.pro/kekstagram';
 
 /* Получает фотографии с сервера */
 
@@ -22,7 +22,7 @@ export async function getPhotos() {
 
 export async function sendForm(formElement) {
   try {
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(`${BASE_URL}/`, {
       method: 'POST',
       body: new FormData(formElement)
     });
