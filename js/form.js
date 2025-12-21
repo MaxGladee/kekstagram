@@ -66,7 +66,6 @@ function initPristine() {
 }
 
 /* Загружает выбранное пользователем изображение в предпросмотр */
-/* Загружает выбранное пользователем изображение в предпросмотр */
 function loadSelectedImage() {
   const file = imgUploadInput.files[0];
 
@@ -96,7 +95,6 @@ function openImgUploadOverlay() {
 }
 
 /* Закрывает окно редактирования изображения */
-/* Закрывает окно редактирования изображения */
 function closeImgUploadOverlay() {
   // Очищаем blob URL перед закрытием
   if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
@@ -122,7 +120,6 @@ function closeImgUploadOverlay() {
     pristine.reset();
   }
 }
-
 
 /* Обработчик нажатия Esc при открытом окне */
 function onOverlayEscKeyDown(evt) {
