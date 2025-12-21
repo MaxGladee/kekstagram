@@ -70,13 +70,18 @@ function loadSelectedImage() {
   const file = imgUploadInput.files[0];
 
   if (file) {
-    const reader = new FileReader();
+    // Очищаем старый blob если был
+    if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
+      URL.revokeObjectURL(imgPreview.src);
+    }
 
-    reader.onload = (evt) => {
-      imgPreview.src = evt.target.result;
-    };
-
-    reader.readAsDataURL(file);
+    const blobUrl = URL.createObjectURL(file);
+    imgPreview.src = blobUrl;
+    // Устанавливаем background-image для всех превью эффектов
+    const effectsPreviews = document.querySelectorAll('.effects__preview');
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url("${blobUrl}")`;
+    });
   }
 }
 
@@ -91,12 +96,29 @@ function openImgUploadOverlay() {
 
 /* Закрывает окно редактирования изображения */
 function closeImgUploadOverlay() {
+  // Очищаем blob URL перед закрытием
+  if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
+    URL.revokeObjectURL(imgPreview.src);
+  }
+
+  imgPreview.src = 'img/upload-default-image.jpg';
+
+  // Очищаем background-image у превью эффектов
+  const effectsPreviews = document.querySelectorAll('.effects__preview');
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
+
   imgUploadOverlay.classList.add('hidden');
   imgUploadForm.reset();
   imgUploadInput.value = '';
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onOverlayEscKeyDown);
   resetImageEditor();
+
+  if (pristine) {
+    pristine.reset();
+  }
 }
 
 /* Обработчик нажатия Esc при открытом окне */
@@ -137,7 +159,7 @@ export function initForm() {
   imgUploadForm.addEventListener('submit', async (evt) => {
     evt.preventDefault();
 
-    if (!pristine || !pristine.validate()) {
+    if (pristine && !pristine.validate()) {
       return;
     }
 
@@ -148,9 +170,11 @@ export function initForm() {
       showSuccessMessage();
       closeImgUploadOverlay();
     } catch (error) {
+      closeImgUploadOverlay();
       showErrorMessage();
     } finally {
       enableSubmitButton();
     }
   });
+
 }

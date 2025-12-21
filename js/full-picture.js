@@ -23,12 +23,13 @@ function createCommentElement(comment) {
 }
 
 function updateCommentCount() {
-  const commentCount = document.querySelector('.social__comment-count');
+  const commentCountContainer = document.querySelector('.social__comment-count');
   const commentLoader = document.querySelector('.comments-loader');
-  const totalComments = currentPhoto.comments.length;
 
+  const totalComments = currentPhoto.comments.length;
   const displayedCount = Math.min(currentDisplayedComments, totalComments);
-  commentCount.textContent = `${displayedCount} из ${totalComments}`;
+
+  commentCountContainer.innerHTML = `<span class="social__comment-shown-count">${displayedCount}</span> из <span class="social__comment-total-count">${totalComments}</span> комментариев`;
 
   if (currentDisplayedComments >= totalComments) {
     commentLoader.classList.add('hidden');
@@ -36,6 +37,7 @@ function updateCommentCount() {
     commentLoader.classList.remove('hidden');
   }
 }
+
 
 function renderComments(photo, startIndex = 0) {
   const socialComments = document.querySelector('.social__comments');
