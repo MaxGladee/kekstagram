@@ -66,15 +66,25 @@ function initPristine() {
 }
 
 /* Загружает выбранное пользователем изображение в предпросмотр */
+/* Загружает выбранное пользователем изображение в предпросмотр */
 function loadSelectedImage() {
   const file = imgUploadInput.files[0];
 
   if (file) {
+    // Очищаем старый blob если был
+    if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
+      URL.revokeObjectURL(imgPreview.src);
+    }
+
     const blobUrl = URL.createObjectURL(file);
     imgPreview.src = blobUrl;
+    // Устанавливаем background-image для всех превью эффектов
+    const effectsPreviews = document.querySelectorAll('.effects__preview');
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url("${blobUrl}")`;
+    });
   }
 }
-
 
 /* Открывает окно редактирования изображения */
 function openImgUploadOverlay() {
@@ -86,7 +96,21 @@ function openImgUploadOverlay() {
 }
 
 /* Закрывает окно редактирования изображения */
+/* Закрывает окно редактирования изображения */
 function closeImgUploadOverlay() {
+  // Очищаем blob URL перед закрытием
+  if (imgPreview.src && imgPreview.src.startsWith('blob:')) {
+    URL.revokeObjectURL(imgPreview.src);
+  }
+
+  imgPreview.src = 'img/upload-default-image.jpg';
+
+  // Очищаем background-image у превью эффектов
+  const effectsPreviews = document.querySelectorAll('.effects__preview');
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
+
   imgUploadOverlay.classList.add('hidden');
   imgUploadForm.reset();
   imgUploadInput.value = '';
@@ -98,6 +122,7 @@ function closeImgUploadOverlay() {
     pristine.reset();
   }
 }
+
 
 /* Обработчик нажатия Esc при открытом окне */
 function onOverlayEscKeyDown(evt) {
