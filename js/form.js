@@ -97,6 +97,10 @@ function closeImgUploadOverlay() {
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onOverlayEscKeyDown);
   resetImageEditor();
+
+  if (pristine) {
+    pristine.reset();
+  }
 }
 
 /* Обработчик нажатия Esc при открытом окне */
