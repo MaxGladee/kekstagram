@@ -22,7 +22,7 @@ export async function getPhotos() {
 
 export async function sendForm(formElement) {
   try {
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(`${BASE_URL}/`, {
       method: 'POST',
       body: new FormData(formElement)
     });
@@ -37,3 +37,4 @@ export async function sendForm(formElement) {
     throw error;
   }
 }
+

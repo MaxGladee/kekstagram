@@ -137,7 +137,7 @@ export function initForm() {
   imgUploadForm.addEventListener('submit', async (evt) => {
     evt.preventDefault();
 
-    if (!pristine || !pristine.validate()) {
+    if (pristine && !pristine.validate()) {
       return;
     }
 
@@ -154,4 +154,5 @@ export function initForm() {
       enableSubmitButton();
     }
   });
+
 }
