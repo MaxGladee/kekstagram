@@ -1,9 +1,9 @@
-import { getPhotos } from './api.js';
-
 const COMMENTS_PER_PAGE = 5;
+// eslint-disable-next-line no-unused-vars
 let currentPhotoIndex = null;
 let currentDisplayedComments = 0;
 let currentPhotos = [];
+let currentPhoto = null;
 
 function createCommentElement(comment) {
   const li = document.createElement('li');
@@ -25,8 +25,7 @@ function createCommentElement(comment) {
 function updateCommentCount() {
   const commentCount = document.querySelector('.social__comment-count');
   const commentLoader = document.querySelector('.comments-loader');
-  const photo = currentPhotos[currentPhotoIndex];
-  const totalComments = photo.comments.length;
+  const totalComments = currentPhoto.comments.length;
 
   const displayedCount = Math.min(currentDisplayedComments, totalComments);
   commentCount.textContent = `${displayedCount} из ${totalComments}`;
@@ -77,6 +76,7 @@ function fillBigPicture(photo) {
 function openBigPicture(photo, photoIndex) {
   const bigPicture = document.querySelector('.big-picture');
 
+  currentPhoto = photo;
   currentPhotoIndex = photoIndex;
 
   fillBigPicture(photo);
@@ -95,6 +95,7 @@ function closeBigPicture() {
 
   currentPhotoIndex = null;
   currentDisplayedComments = 0;
+  currentPhoto = null;
 }
 
 export function initBigPicture() {
@@ -111,32 +112,31 @@ export function initBigPicture() {
   });
 
   commentsLoader.addEventListener('click', () => {
-    if (currentPhotoIndex !== null) {
-      const photo = currentPhotos[currentPhotoIndex];
-      renderComments(photo, currentDisplayedComments);
+    if (currentPhoto) {
+      renderComments(currentPhoto, currentDisplayedComments);
     }
   });
 }
 
 export function attachPhotoClickHandlers() {
   const picturesContainer = document.querySelector('.pictures');
+  const pictures = picturesContainer.querySelectorAll('.picture');
 
-  picturesContainer.addEventListener('click', async (evt) => {
-    const picture = evt.target.closest('.picture');
-
-    if (picture) {
-      try {
-        currentPhotos = await getPhotos();
-        const pictures = document.querySelectorAll('.picture');
-        const index = Array.from(pictures).indexOf(picture);
-
-        if (index !== -1) {
-          openBigPicture(currentPhotos[index], index);
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Ошибка при загрузке данных:', error);
+  pictures.forEach((picture, index) => {
+    picture.addEventListener('click', () => {
+      if (index !== -1 && currentPhotos.length > 0) {
+        openBigPicture(currentPhotos[index], index);
       }
-    }
+    });
   });
+}
+
+/* Функция для открытия фото из фильтров */
+
+export function openBigPictureFromFilter(photo, photoIndex) {
+  openBigPicture(photo, photoIndex);
+}
+
+export function setCurrentPhotos(photos) {
+  currentPhotos = photos;
 }

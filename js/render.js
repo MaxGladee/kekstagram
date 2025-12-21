@@ -1,4 +1,6 @@
 import { getPhotos } from './api.js';
+import { initFilters } from './filters.js';
+import { setCurrentPhotos, openBigPictureFromFilter } from './full-picture.js';
 
 function createPhotoElement(photo) {
   const template = document.querySelector('#picture');
@@ -17,11 +19,26 @@ function createPhotoElement(photo) {
   return pictureElement;
 }
 
+function attachInitialPhotoClickHandlers(photos) {
+  const picturesContainer = document.querySelector('.pictures');
+  const pictures = picturesContainer.querySelectorAll('.picture');
+
+  pictures.forEach((picture, index) => {
+    picture.addEventListener('click', () => {
+      openBigPictureFromFilter(photos[index], index);
+    });
+  });
+}
+
 export async function renderPictures() {
   const picturesContainer = document.querySelector('.pictures');
 
   try {
     const photos = await getPhotos();
+
+    /* Сохраняет текущие фотографии для фулл-скрина */
+
+    setCurrentPhotos(photos);
 
     const fragment = document.createDocumentFragment();
 
@@ -30,6 +47,12 @@ export async function renderPictures() {
     });
 
     picturesContainer.appendChild(fragment);
+
+    attachInitialPhotoClickHandlers(photos);
+
+    /* Инициализирует фильтры */
+
+    initFilters();
   } catch (error) {
     const errorElement = document.createElement('div');
     errorElement.style.cssText = 'padding: 20px; color: red; text-align: center;';
