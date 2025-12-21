@@ -1,10 +1,9 @@
-import { photos } from './main.js';
-
-/* Функция просмотра фотографий в полноразмерном режиме */
+import { getPhotos } from './api.js';
 
 const COMMENTS_PER_PAGE = 5;
 let currentPhotoIndex = null;
 let currentDisplayedComments = 0;
+let currentPhotos = [];
 
 function createCommentElement(comment) {
   const li = document.createElement('li');
@@ -23,12 +22,10 @@ function createCommentElement(comment) {
   return li;
 }
 
-/* Обновляет счетчик комментариев и управляет видимостью кнопки загрузки */
-
 function updateCommentCount() {
   const commentCount = document.querySelector('.social__comment-count');
   const commentLoader = document.querySelector('.comments-loader');
-  const photo = photos[currentPhotoIndex];
+  const photo = currentPhotos[currentPhotoIndex];
   const totalComments = photo.comments.length;
 
   const displayedCount = Math.min(currentDisplayedComments, totalComments);
@@ -40,9 +37,6 @@ function updateCommentCount() {
     commentLoader.classList.remove('hidden');
   }
 }
-
-
-/* Отрисовывает комментарии по 5 штук */
 
 function renderComments(photo, startIndex = 0) {
   const socialComments = document.querySelector('.social__comments');
@@ -60,8 +54,6 @@ function renderComments(photo, startIndex = 0) {
   currentDisplayedComments = endIndex;
   updateCommentCount();
 }
-
-/* Заполняет полноразмерное окно данными о фотографии */
 
 function fillBigPicture(photo) {
   const bigPictureImg = document.querySelector('.big-picture__img img');
@@ -82,8 +74,6 @@ function fillBigPicture(photo) {
   renderComments(photo, 0);
 }
 
-/* Открывает окно полноразмерного просмотра */
-
 function openBigPicture(photo, photoIndex) {
   const bigPicture = document.querySelector('.big-picture');
 
@@ -96,8 +86,6 @@ function openBigPicture(photo, photoIndex) {
   document.body.classList.add('modal-open');
 }
 
-/* Закрывает окно полноразмерного просмотра */
-
 function closeBigPicture() {
   const bigPicture = document.querySelector('.big-picture');
 
@@ -108,8 +96,6 @@ function closeBigPicture() {
   currentPhotoIndex = null;
   currentDisplayedComments = 0;
 }
-
-/* Инициализирует модуль полноразмерного просмотра */
 
 export function initBigPicture() {
   const bigPicture = document.querySelector('.big-picture');
@@ -126,26 +112,30 @@ export function initBigPicture() {
 
   commentsLoader.addEventListener('click', () => {
     if (currentPhotoIndex !== null) {
-      const photo = photos[currentPhotoIndex];
+      const photo = currentPhotos[currentPhotoIndex];
       renderComments(photo, currentDisplayedComments);
     }
   });
 }
 
-/* Добавляет слушатели клика к миниатюрам */
-
 export function attachPhotoClickHandlers() {
   const picturesContainer = document.querySelector('.pictures');
 
-  picturesContainer.addEventListener('click', (evt) => {
+  picturesContainer.addEventListener('click', async (evt) => {
     const picture = evt.target.closest('.picture');
 
     if (picture) {
-      const pictures = document.querySelectorAll('.picture');
-      const index = Array.from(pictures).indexOf(picture);
+      try {
+        currentPhotos = await getPhotos();
+        const pictures = document.querySelectorAll('.picture');
+        const index = Array.from(pictures).indexOf(picture);
 
-      if (index !== -1) {
-        openBigPicture(photos[index], index);
+        if (index !== -1) {
+          openBigPicture(currentPhotos[index], index);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Ошибка при загрузке данных:', error);
       }
     }
   });
