@@ -152,6 +152,7 @@ export function initForm() {
       showSuccessMessage();
       closeImgUploadOverlay();
     } catch (error) {
+      closeImgUploadOverlay();
       showErrorMessage();
     } finally {
       enableSubmitButton();

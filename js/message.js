@@ -1,18 +1,22 @@
 /* Модуль для показа сообщений */
 
-function closeMessage(messageElement) {
+function closeMessage(messageElement, handlers) {
   messageElement.remove();
+
+  // Удаляем event listeners
+  document.removeEventListener('keydown', handlers.keydown);
+  document.removeEventListener('click', handlers.click);
 }
 
-function onMessageEscKeyDown(evt, messageElement) {
+function onMessageEscKeyDown(evt, messageElement, handlers) {
   if (evt.key === 'Escape') {
-    closeMessage(messageElement);
+    closeMessage(messageElement, handlers);
   }
 }
 
-function onMessageClick(evt, messageElement) {
+function onMessageClick(evt, messageElement, handlers) {
   if (evt.target === messageElement) {
-    closeMessage(messageElement);
+    closeMessage(messageElement, handlers);
   }
 }
 
@@ -24,13 +28,18 @@ export function showSuccessMessage() {
 
   const closeButton = messageElement.querySelector('.success__button');
 
+  // Создаём handlers для сохранения ссылок
+  const handlers = {
+    keydown: (evt) => onMessageEscKeyDown(evt, messageElement, handlers),
+    click: (evt) => onMessageClick(evt, messageElement, handlers)
+  };
+
   closeButton.addEventListener('click', () => {
-    closeMessage(messageElement);
+    closeMessage(messageElement, handlers);
   });
 
-  document.addEventListener('keydown', (evt) => onMessageEscKeyDown(evt, messageElement));
-
-  document.addEventListener('click', (evt) => onMessageClick(evt, messageElement));
+  document.addEventListener('keydown', handlers.keydown);
+  document.addEventListener('click', handlers.click);
 }
 
 export function showErrorMessage() {
@@ -41,11 +50,16 @@ export function showErrorMessage() {
 
   const closeButton = messageElement.querySelector('.error__button');
 
+  // Создаём handlers для сохранения ссылок
+  const handlers = {
+    keydown: (evt) => onMessageEscKeyDown(evt, messageElement, handlers),
+    click: (evt) => onMessageClick(evt, messageElement, handlers)
+  };
+
   closeButton.addEventListener('click', () => {
-    closeMessage(messageElement);
+    closeMessage(messageElement, handlers);
   });
 
-  document.addEventListener('keydown', (evt) => onMessageEscKeyDown(evt, messageElement));
-
-  document.addEventListener('click', (evt) => onMessageClick(evt, messageElement));
+  document.addEventListener('keydown', handlers.keydown);
+  document.addEventListener('click', handlers.click);
 }
