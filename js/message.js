@@ -3,9 +3,10 @@
 function closeMessage(messageElement, handlers) {
   messageElement.remove();
 
-  // Удаляем event listeners
-  document.removeEventListener('keydown', handlers.keydown);
-  document.removeEventListener('click', handlers.click);
+  if (handlers) {
+    document.removeEventListener('keydown', handlers.keydown);
+    document.removeEventListener('click', handlers.click);
+  }
 }
 
 function onMessageEscKeyDown(evt, messageElement, handlers) {

@@ -70,15 +70,11 @@ function loadSelectedImage() {
   const file = imgUploadInput.files[0];
 
   if (file) {
-    const reader = new FileReader();
-
-    reader.onload = (evt) => {
-      imgPreview.src = evt.target.result;
-    };
-
-    reader.readAsDataURL(file);
+    const blobUrl = URL.createObjectURL(file);
+    imgPreview.src = blobUrl;
   }
 }
+
 
 /* Открывает окно редактирования изображения */
 function openImgUploadOverlay() {
