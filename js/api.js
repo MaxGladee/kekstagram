@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* Модуль для работы с сервером */
 
-const BASE_URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
+const BASE_URL = 'https://32.javascript.htmlacademy.pro/kekstagram';
 
 /* Получает фотографии с сервера */
 
