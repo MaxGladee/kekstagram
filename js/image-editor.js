@@ -130,14 +130,10 @@ function onEffectChange(evt) {
 export function initImageEditor() {
   updateScale(100);
 
-  scaleMinus.removeEventListener('click', onScaleMinus);
-  scalePlus.removeEventListener('click', onScalePlus);
-
   scaleMinus.addEventListener('click', onScaleMinus);
   scalePlus.addEventListener('click', onScalePlus);
 
   effectRadios.forEach((radio) => {
-    radio.removeEventListener('change', onEffectChange);
     radio.addEventListener('change', onEffectChange);
   });
 

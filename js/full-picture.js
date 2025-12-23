@@ -9,15 +9,19 @@ function createCommentElement(comment) {
   const li = document.createElement('li');
   li.className = 'social__comment';
 
-  li.innerHTML = `
-    <img
-        class="social__picture"
-        src="${comment.avatar}"
-        alt="${comment.name}"
-        width="35"
-        height="35">
-    <p class="social__text">${comment.message}</p>
-  `;
+  const img = document.createElement('img');
+  img.className = 'social__picture';
+  img.src = comment.avatar;
+  img.alt = comment.name;
+  img.width = 35;
+  img.height = 35;
+
+  const p = document.createElement('p');
+  p.className = 'social__text';
+  p.textContent = comment.message;
+
+  li.appendChild(img);
+  li.appendChild(p);
 
   return li;
 }
@@ -126,7 +130,7 @@ export function attachPhotoClickHandlers() {
 
   pictures.forEach((picture, index) => {
     picture.addEventListener('click', () => {
-      if (index !== -1 && currentPhotos.length > 0) {
+      if (currentPhotos.length > 0) {
         openBigPicture(currentPhotos[index], index);
       }
     });

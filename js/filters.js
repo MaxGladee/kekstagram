@@ -1,4 +1,3 @@
-import { getPhotos } from './api.js';
 import { openBigPictureFromFilter } from './full-picture.js';
 
 const RENDER_DEBOUNCE_DELAY = 500;
@@ -14,7 +13,7 @@ const filterButtons = {
 
 const filtersContainer = document.querySelector('.img-filters');
 
-/* Функция для получения случайных фотографи */
+/* Функция для получения случайных фотографий */
 
 function getRandomPhotos(photos, count = 10) {
   const shuffled = [...photos].sort(() => Math.random() - 0.5);
@@ -115,9 +114,9 @@ function attachPhotoClickHandlers(photos) {
 
 /* Функция для инициализации фильтров */
 
-export async function initFilters() {
+export function initFilters(photos) {
   try {
-    allPhotos = await getPhotos();
+    allPhotos = photos;
 
     filtersContainer.classList.remove('img-filters--inactive');
 

@@ -52,7 +52,7 @@ export async function renderPictures() {
 
     /* Инициализирует фильтры */
 
-    initFilters();
+    initFilters(photos);
   } catch (error) {
     const errorElement = document.createElement('div');
     errorElement.style.cssText = 'padding: 20px; color: red; text-align: center;';
